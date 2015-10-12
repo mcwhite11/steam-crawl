@@ -17,13 +17,14 @@ public class App {
 	public static void main(String[] args) {
 		ArrayList<String> appids = new ArrayList<String>();
 		appids.add("282140");
+		appids.add("65980");
 
 		ArrayList<Game> games = crawl(appids);
 
 		for (int i = 0; i < appids.size(); i++) {
 			System.out.println("Title: " + games.get(i).getTitle());
 			System.out.println("Description: " + games.get(i).getDescription());
-			System.out.println("Developer: " + games.get(i).getDeveloper());
+			System.out.println("Developer: " + games.get(i).getDeveloper()+"\n\n");
 
 		}
 
@@ -48,7 +49,6 @@ public class App {
 				newGame.setDeveloper(getDeveloperFromDetailsBlock(doc));
 				
 				games.add(newGame);
-				return games;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -56,7 +56,7 @@ public class App {
 			}
 
 		}
-		return null;
+		return games;
 	}
 
 	public static String getDeveloperFromDetailsBlock(Document doc) {
