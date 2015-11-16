@@ -2,6 +2,7 @@ package com.may1635.steam_crawl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,8 +25,10 @@ public class App {
 		for (int i = 0; i < appids.size(); i++) {
 			System.out.println("Title: " + games.get(i).getTitle());
 			System.out.println("Description: " + games.get(i).getDescription());
-			System.out.println("Developer: " + games.get(i).getDeveloper()+"\n\n");
-
+			System.out.println("Developer: " + games.get(i).getDeveloper());
+			System.out.println("Genre(s): "+games.get(i).getGenres().toString());
+			System.out.println("Release Date: "+games.get(i).getReleaseDate());
+			System.out.print("\n\n");
 		}
 
 	}
@@ -47,7 +50,8 @@ public class App {
 						.getElementsByClass("game_description_snippet").first()
 						.text());
 				newGame.setDeveloper(getDeveloperFromDetailsBlock(doc));
-				
+				newGame.setGenres(getGenresFromDetailsBlock(doc));
+				newGame.setReleaseDate(getReleaseDateFromDetailsBlock(doc));
 				games.add(newGame);
 
 			} catch (IOException e) {
@@ -70,5 +74,61 @@ public class App {
 		}
 		return null;
 
+	}
+	
+	public static ArrayList<String> getGenresFromDetailsBlock(Document doc)
+	{
+		
+		ArrayList<String> genres = new ArrayList<String>();
+		Elements details = doc.getElementsByClass("details_block").first().children();
+		for (int i = 0; i < details.size(); i++) {
+			if(details.get(i).text().equals("Genre:"))
+			{
+				for(int j=i+1; j<details.size(); j++)
+				{
+					
+					
+					if(details.get(j).tag().toString().equals("a"))
+					{
+						genres.add(details.get(j).text());
+					}
+						
+					
+					if(details.get(j).tag().toString().equals("br"))
+						break;
+				}
+				
+				return genres;
+			}
+		}
+		return genres;
+	}
+	
+	public static ArrayList<String> getMetaTags(Document doc)
+	{
+		return null;
+	}
+	
+	public static String getReleaseDateFromDetailsBlock(Document doc) {
+		Elements details = doc.getElementsByClass("details_block").first()
+				.children();
+		for (int i = 0; i < details.size(); i++) {
+			if(details.get(i).text().equals("Release Date:"))
+			{
+				return details.get(i).nextSibling().toString().trim();
+			}
+		}
+		return null;
+
+	}
+	
+	public static int getNumUserReviews(Document doc)
+	{
+		return 0;
+	}
+	
+	public static int getAverageUserReview(Document doc)
+	{
+		return 0;
 	}
 }
