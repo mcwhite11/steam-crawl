@@ -1,28 +1,41 @@
 package com.may1635.steam_crawl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.xml.parsers.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.may1635.domain.Game;
+import com.may1635.utilities.xmlParser;
 
 /**
  * Hello world!
  * 
  */
 public class App {
+	private static int numberGamesToCrawl = 500;
+	private static int actualNumberGamesCrawled = 0;
+	
 	public static void main(String[] args) {
-		ArrayList<String> appids = new ArrayList<String>();
-		appids.add("282140");
-		appids.add("65980");
-
+		
+		actualNumberGamesCrawled = numberGamesToCrawl;
+		ArrayList<String> appids = xmlParser.parseXMLFile();
+		System.out.println(appids.size());
+		
+		for(int i = 0; i < numberGamesToCrawl; i++) {
+			System.out.println(appids.get(i));
+		}
+		
 		ArrayList<Game> games = crawl(appids);
 
-		for (int i = 0; i < appids.size(); i++) {
+		for (int i = 0; i < actualNumberGamesCrawled; i++) {
 			System.out.println("Title: " + games.get(i).getTitle());
 			System.out.println("Description: " + games.get(i).getDescription());
 			System.out.println("Developer: " + games.get(i).getDeveloper());
@@ -37,7 +50,7 @@ public class App {
 
 		ArrayList<Game> games = new ArrayList<Game>();
 
-		for (int i = 0; i < appids.size(); i++) {
+		for (int i = 0; i < numberGamesToCrawl; i++) {
 			String appid = appids.get(i);
 
 			try {
@@ -54,9 +67,9 @@ public class App {
 				newGame.setReleaseDate(getReleaseDateFromDetailsBlock(doc));
 				games.add(newGame);
 
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				//game not found
+				actualNumberGamesCrawled--;
 			}
 
 		}
@@ -131,4 +144,6 @@ public class App {
 	{
 		return 0;
 	}
+	
+	
 }
