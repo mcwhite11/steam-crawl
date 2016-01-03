@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * This is the User class which holds all the information pulled from Steam Web API,
  * namely form the listed links below:
  * Player Summary		| http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=XXXXXXXXXXXXXXXXXXXXXXX&steamids=YYYYYYYYYYYYYYYYY
- * Friends List			| http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&steamid=76561197960435530&relationship=friend
+ * Friends List			| http://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&steamid=76561197960435530&relationship=friend
  * Player Achievements	| http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=440&key=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&steamid=76561197972495328
  */
 public class User {
@@ -33,7 +33,6 @@ public class User {
 	private String gameServerIP;	//The ip and port of the game server the user is currently playing on, if they are playing on-line in a game using Steam matchmaking. Otherwise will be set to "0.0.0.0:0".
 	private String gameExtraInfo;	//If the user is currently in-game, this will be the name of the game they are playing. This may be the name of a non-Steam game shortcut.
 	
-	private String cityID;			//This value will be removed in a future update (see loccityid)
 	private String locCountryCode;	//If set on the user's Steam Community profile, The user's country of residence, 2-character ISO country code
 	private String locStateCode;	//If set on the user's Steam Community profile, The user's state of residence
 	private String locCityID;		//An internal code indicating the user's city of residence. A future update will provide this data in a more useful way.
@@ -97,15 +96,12 @@ public class User {
 	public void setGameExtraInfo(String gameExtraInfo) { this.gameExtraInfo = gameExtraInfo; }
 	
 	
-	public String getCityID() { return cityID; }
-	public void getCityID(String cityID) { this.cityID = cityID; }
-	
 	public String getLocCountryCode() { return locCountryCode; }
-	public void getLocCountryCode(String locCountryCode) { this.locCountryCode = locCountryCode; }
+	public void setLocCountryCode(String locCountryCode) { this.locCountryCode = locCountryCode; }
 	
 	public String getLocStateCode() { return locStateCode; }
-	public void getLocStateCode(String locStateCode) { this.locStateCode = locStateCode; }
+	public void setLocStateCode(String locStateCode) { this.locStateCode = locStateCode; }
 	
 	public String getLocCityID() { return locCityID; }
-	public void getLocCityID(String locCityID) { this.locCityID = locCityID; }
+	public void setLocCityID(String locCityID) { this.locCityID = locCityID; }
 }

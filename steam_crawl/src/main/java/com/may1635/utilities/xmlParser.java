@@ -27,9 +27,6 @@ public class xmlParser {
 	      }
 		return null;
 	}
-	
-	
-		
 }
 
 	
