@@ -9,10 +9,6 @@ import org.jsoup.select.Elements;
 
 import com.may1635.domain.Game;
 
-/**
- * Hello world!
- * 
- */
 public class App {
 	public static void main(String[] args) {
 		ArrayList<String> appids = new ArrayList<String>();
@@ -25,9 +21,7 @@ public class App {
 			System.out.println("Title: " + games.get(i).getTitle());
 			System.out.println("Description: " + games.get(i).getDescription());
 			System.out.println("Developer: " + games.get(i).getDeveloper()+"\n\n");
-
 		}
-
 	}
 
 	public static ArrayList<Game> crawl(ArrayList<String> appids) {
@@ -51,24 +45,19 @@ public class App {
 				games.add(newGame);
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 		return games;
 	}
 
 	public static String getDeveloperFromDetailsBlock(Document doc) {
-		Elements details = doc.getElementsByClass("details_block").first()
-				.children();
+		Elements details = doc.getElementsByClass("details_block").first().children();
 		for (int i = 0; i < details.size(); i++) {
-			if(details.get(i).text().equals("Developer:"))
-			{
+			if(details.get(i).text().equals("Developer:")) {
 				return details.get(i).nextElementSibling().text().trim();
 			}
 		}
 		return null;
-
 	}
 }
