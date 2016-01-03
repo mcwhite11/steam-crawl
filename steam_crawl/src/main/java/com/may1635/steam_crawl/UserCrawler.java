@@ -103,19 +103,22 @@ public class UserCrawler {
 					+ "&steamid=" + steamID
 					+ "&relationship=friend");
 			
-		    // Connect to the URL using java's native library
-		    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-		    request.connect();
+			// Connect to the URL using java's native library
+			HttpURLConnection request = (HttpURLConnection) url.openConnection();
+			request.connect();
+			
+			// Convert to a JSON object to print data
+			JsonParser jp = new JsonParser(); //from gson
+			JsonElement friendsEle = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+			JsonObject friendsObj = friendsEle.getAsJsonObject(); //May be an array, may be an object
+			String friends = friendsObj.get("steamid").getAsString(); //just grab the steamid
+			
+			System.out.println(friendsObj);
+			System.out.println(friends);
 
-		    // Convert to a JSON object to print data
-		    JsonParser jp = new JsonParser(); //from gson
-		    JsonElement friendEle = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-		    JsonObject friendObj = friendEle.getAsJsonObject(); //May be an array, may be an object
-		    String friend = friendObj.get("steamid").getAsString(); //just grab the steamid
-		    
-		    //TODO add all friends not just one
-		    friendsList.add(friend);
-		    
+			//TODO add all friends not just one
+			//friendsList.add(friends);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -180,7 +183,7 @@ public class UserCrawler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return user;
 	}
 }
