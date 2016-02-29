@@ -36,7 +36,7 @@ public class User {
 	private String locCountryCode;	//If set on the user's Steam Community profile, The user's country of residence, 2-character ISO country code
 	private String locStateCode;	//If set on the user's Steam Community profile, The user's state of residence
 	private String locCityID;		//An internal code indicating the user's city of residence. A future update will provide this data in a more useful way.
-	
+	private ArrayList<String> games;
 	
 	public String getSteamID() { return steamID; }
 	public void setSteamID(String steamID) { this.steamID = steamID; }
@@ -104,4 +104,10 @@ public class User {
 	
 	public String getLocCityID() { return locCityID; }
 	public void setLocCityID(String locCityID) { this.locCityID = locCityID; }
+	public ArrayList<String> getGames() {
+		return games;
+	}
+	public void setGames(ArrayList<String> games) {
+		this.games = games;
+	}
 }

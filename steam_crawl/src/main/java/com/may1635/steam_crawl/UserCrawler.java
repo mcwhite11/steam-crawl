@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Stack;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
@@ -21,15 +23,51 @@ import com.may1635.domain.User;
 
 public class UserCrawler {
 	
+	
 	private static String key = "EE754BC31EC90048E3D53C788A3DC43D";
 	
-	public static void main(String[] args) {
+	private static final int MAX_NUM_USERS_TO_CRAWL = 100;
+	/**
+	 * Matt, instead of using this list to keep track of which IDs have been crawled we should probably use the DB so that we don't 
+	 * use up all the server's memory.
+	 */
+	private static ArrayList<String> crawledIDs;	
+	public static void startUserCrawl() {
 		
 		Stack<String> steamIDs = new Stack<String>();
-		steamIDs.push("76561197960435530"); // Robin Walker
-		gatherSteamIDs(steamIDs);
+		
+		crawledIDs = new ArrayList<String>();
+		
+		/**
+		 * Matt, we should change the way search is started to use existing data in the DB. Maybe we could randomly choose a user ID
+		 * from the DB each time we crawl?
+		 */
+		String rootUserID = "76561197960435530"; // Robin Walker
+		
+		steamIDs.push(rootUserID); 
 		
 		HashMap<String, User> users = new HashMap<String, User>();
+		
+		while(crawledIDs.size() < MAX_NUM_USERS_TO_CRAWL)
+		{	
+			crawledIDs.add(steamIDs.peek());
+			
+			User newUser = populateUser(steamIDs.peek());
+			
+			if(newUser != null)
+				{
+					users.put(newUser.getSteamID(), newUser);
+					
+					//send the just crawled user's list of games to the GameCrawler
+					GameCrawler.crawl(newUser.getGames());
+				}
+			
+			gatherSteamIDs(steamIDs);
+		}
+		
+		
+		
+		
 		
 		// Print out all the information put into the users list
 		for(User user : users.values()) {
@@ -89,9 +127,12 @@ public class UserCrawler {
 	private static void gatherSteamIDs(Stack<String> steamIDs) {
 		ArrayList<String> friendsList = getFriendsList(steamIDs.pop());
 		
-		for(String friend : friendsList) {
-			steamIDs.push(friend);
-		}
+		if(friendsList != null)
+			for(String friendID : friendsList) {
+				if(shouldCrawlUser(friendID))
+					steamIDs.push(friendID);
+				
+			}
 		
 		//TODO "recurse" through the stack adding friend's friendlists to the stack...
 		// Still need a terminating case
@@ -126,7 +167,7 @@ public class UserCrawler {
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			return null;
 		}
 		
 		return friendsList;
@@ -181,7 +222,7 @@ public class UserCrawler {
 			InputStreamReader stream = new InputStreamReader((InputStream) request.getContent());
 			JsonObject root = jp.parse(stream).getAsJsonObject();
 			JsonObject response = root.get("response").getAsJsonObject();
-			JsonObject player = response.get("players").getAsJsonObject();
+			JsonObject player = response.get("players").getAsJsonArray().get(0).getAsJsonObject();
 			System.out.println(player);
 			
 		    // This really should be a constructor...
@@ -193,24 +234,84 @@ public class UserCrawler {
 			user.setAvatarMedium(player.get("avatarmedium").getAsString());
 			user.setAvatarFull(player.get("avatarfull").getAsString());
 			user.setPersonaState(player.get("personastate").getAsInt());
-			user.setVisibilityState(player.get("visibilitystate").getAsInt());
-			user.setProfileState(player.get("profilestate").getAsInt());
+			if(player.get("visibilitystate") != null)
+				user.setVisibilityState(player.get("visibilitystate").getAsInt());
+			if(player.get("profilestate") != null)
+				user.setProfileState(player.get("profilestate").getAsInt());
 			user.setLastLogOff(player.get("lastlogoff").getAsInt());
-			user.setCommentPermission(player.get("commentpermission").getAsInt());
-			user.setRealName(player.get("realname").getAsString());
-			user.setPrimaryClanID(player.get("primaryclanid").getAsString());
-			user.setTimeCreated(player.get("timecreated").getAsString());
-			user.setGameID(player.get("gameid").getAsString());
-			user.setGameServerIP(player.get("gameserverip").getAsString());
-			user.setGameExtraInfo(player.get("gameextrainfo").getAsString());
-			user.setLocCountryCode(player.get("loccountrycode").getAsString());
-			user.setLocStateCode(player.get("locstatecode").getAsString());
-			user.setLocCityID(player.get("loccityid").getAsString());
+			if(player.get("commentpermission") != null)
+				user.setCommentPermission(player.get("commentpermission").getAsInt());
+			if(player.get("realname") != null)
+				user.setRealName(player.get("realname").getAsString());
+			if(player.get("primaryclanid") != null)
+				user.setPrimaryClanID(player.get("primaryclanid").getAsString());
+			if(player.get("timecreated") != null)
+				user.setTimeCreated(player.get("timecreated").getAsString());
+			if(player.get("gameid") != null)
+				user.setGameID(player.get("gameid").getAsString());
+			if(player.get("gameserverip") != null)
+				user.setGameServerIP(player.get("gameserverip").getAsString());
+			if(player.get("gameextrainfo") != null)
+				user.setGameExtraInfo(player.get("gameextrainfo").getAsString());
+			if(player.get("loccountrycode") != null)
+				user.setLocCountryCode(player.get("loccountrycode").getAsString());
+			if(player.get("locstatecode") != null)
+				user.setLocStateCode(player.get("locstatecode").getAsString());
+			if(player.get("loccityid") != null)
+				user.setLocCityID(player.get("loccityid").getAsString());
 			
+			user.setGames(populateUsersGames(user.getSteamID()));
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 		
 		return user;
 	}
+	
+	public static ArrayList<String> populateUsersGames(String steamID)
+	{
+		ArrayList<String> appIDs = new ArrayList<String>();
+		
+		//http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=EE754BC31EC90048E3D53C788A3DC43D&steamid=76561197960434622&format=json
+		try {    
+			URL url = new URL("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+key+
+					"&steamid="+ steamID +"&format=json");
+			
+			// Connect to the URL using java's native library
+			HttpURLConnection request = (HttpURLConnection) url.openConnection();
+			request.connect();
+
+			// Convert to a JSON object to print data	
+			JsonParser jp = new JsonParser(); //from gson
+			InputStreamReader stream = new InputStreamReader((InputStream) request.getContent());
+			JsonObject root = jp.parse(stream).getAsJsonObject();
+			JsonObject response = root.get("response").getAsJsonObject();
+			if(response.get("game_count").getAsInt() == 0)
+				return null;
+			JsonArray games = response.get("games").getAsJsonArray();
+			
+			for(JsonElement game: games)
+			{
+				appIDs.add(game.getAsJsonObject().get("appid").getAsString());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return appIDs;
+	}
+	
+	/**
+	 * 
+	 * Matt, here's where you can add a check to see if the user is already in the database or whatever you think is the best way we should
+	 * determine whether or not to crawl a user.
+	 */
+	private static boolean shouldCrawlUser(String userID)
+	{
+		return !crawledIDs.contains(userID);
+		
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Game {
 	private String title;
+	private String appId;
 	private String description;
 	private String developer;
 	private int userReview;
@@ -35,4 +36,10 @@ public class Game {
 	
 	public ArrayList<String> getMetaTags() { return metaTags; }
 	public void setMetaTags(ArrayList<String> metaTags) { this.metaTags = metaTags; }
+	public String getAppId() {
+		return appId;
+	}
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
 }
